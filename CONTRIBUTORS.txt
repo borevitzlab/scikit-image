@@ -191,3 +191,7 @@
 
 - Alexey Umnov
   skimage.draw.ellipse bug fix and tests.
+  
+- Chuong Nguyen of Borevitz Lab, Research School of Biology, ANU
+  Color balance
+

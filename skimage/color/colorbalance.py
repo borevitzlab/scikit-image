@@ -28,7 +28,7 @@ Supported color spaces
 
 References
 ----------
-.. [1] Constantinou2013 - A comparison of color correction algorithms for
+.. [1] Constantinou (2013) A comparison of color correction algorithms for
        endoscopic cameras
 .. [2] CameraTrax color card - https://www.cameratrax.com/color_balance_2x3.php
 ...[3] http://xritephoto.com/documents/literature/en/ColorData-1p_EN.pdf
