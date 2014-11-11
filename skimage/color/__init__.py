@@ -56,7 +56,9 @@ from .delta_e import (deltaE_cie76,
 
 from .colorbalance import (get_colorcard_colors,
                            get_color_correction_parameters,
-                           correct_color)
+                           correct_color,
+                           ColorChecker_CameraTrax,
+                           ColorChecker_XRite)
 
 
 __all__ = ['convert_colorspace',
@@ -110,5 +112,7 @@ __all__ = ['convert_colorspace',
            'deltaE_cmc',
            'get_colorcard_colors',
            'get_color_correction_parameters',
-           'correct_color'
+           'correct_color',
+           'ColorChecker_CameraTrax',
+           'ColorChecker_XRite'
            ]

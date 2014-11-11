@@ -6,7 +6,8 @@ Functions for color balance using colorchecker/color card.
 
 Color correction implements two gamma correction algorithms described in [1].
 The new gamma correction algorithm yields much better accuracy than the classic
-one. Ground true RGB values of CameraTrax color card [2] is included.
+one. Ground true RGB values of CameraTrax color card [2] and X-Rite
+colorchecker are included.
 
 
 The API consists of functions to:
@@ -30,6 +31,7 @@ References
 .. [1] Constantinou2013 - A comparison of color correction algorithms for
        endoscopic cameras
 .. [2] CameraTrax color card - https://www.cameratrax.com/color_balance_2x3.php
+...[3] http://xritephoto.com/documents/literature/en/ColorData-1p_EN.pdf
 """
 
 from __future__ import division
@@ -37,14 +39,22 @@ from __future__ import division
 import numpy as np
 from scipy import optimize
 
-# This is ground true values for CameraTrax color card
-CameraTrax_24ColorCard = np.asarray(
+
+ColorChecker_CameraTrax = np.asarray(
     [[115., 196., 91., 94., 129., 98., 223., 58., 194., 93., 162., 229.,
       49., 77., 173., 241., 190., 0., 242., 203., 162., 120., 84., 50.],
      [83., 147., 122., 108., 128., 190., 124., 92., 82., 60., 190., 158.,
       66., 153., 57., 201., 85., 135., 243., 203., 163., 120., 84., 50.],
      [68., 127., 155., 66., 176., 168., 47., 174., 96., 103., 62., 41.,
       147., 71., 60., 25., 150., 166., 245., 204., 162., 120., 84., 52.]])
+
+ColorChecker_XRite = np.asarray(
+    [[115., 194., 98., 87., 133., 103., 214., 80., 193., 94., 157., 224.,
+      56., 70., 175., 231., 187., 8., 243., 200., 160., 122., 85., 52.],
+     [82., 150., 122., 108., 128., 189., 126., 91., 90., 60., 188., 163.,
+      61., 148., 54., 199., 86., 133., 243., 200., 160., 122., 85., 52.],
+     [68., 130., 157., 67., 177., 170., 44., 166., 99., 108., 64., 46.,
+      150., 73., 60., 31., 149., 161., 242., 200., 160., 121., 85., 52.]])
 
 
 def _classic_gamma_correction_model(colors, color_alpha, color_constant,
