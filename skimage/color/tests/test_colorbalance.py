@@ -22,7 +22,7 @@ from skimage import data_dir
 from skimage.color import (get_colorcard_colors,
                            get_color_correction_parameters,
                            correct_color,
-                           ColorChecker_CameraTrax)
+                           ColorCheckerRGB_CameraTrax)
 
 
 class TestColorbalance(TestCase):
@@ -30,7 +30,7 @@ class TestColorbalance(TestCase):
     color_card = imread(os.path.join(data_dir, 'cropped_color_card.png'),
                         plugin="freeimage")
     actual_colors = get_colorcard_colors(color_card, grid_size=[6, 4])
-    true_colors = ColorChecker_CameraTrax
+    true_colors = ColorCheckerRGB_CameraTrax
 
     # predicted results
     color_alpha = np.array([[0.98609494, 0.1093022, -0.13196349],

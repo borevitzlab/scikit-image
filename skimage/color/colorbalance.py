@@ -7,7 +7,7 @@ Functions for color balance using colorchecker/color card.
 Color correction implements two gamma correction algorithms described in [1].
 The new gamma correction algorithm yields much better accuracy than the classic
 one. Ground-truth RGB values of CameraTrax color card [2] and X-Rite
-colorchecker are included.
+colorchecker [3] are included.
 
 
 The API consists of functions to:
@@ -40,7 +40,7 @@ import numpy as np
 from scipy import optimize
 
 
-ColorChecker_CameraTrax = np.asarray(
+ColorCheckerRGB_CameraTrax = np.asarray(
     [[115., 196., 91., 94., 129., 98., 223., 58., 194., 93., 162., 229.,
       49., 77., 173., 241., 190., 0., 242., 203., 162., 120., 84., 50.],
      [83., 147., 122., 108., 128., 190., 124., 92., 82., 60., 190., 158.,
@@ -48,7 +48,7 @@ ColorChecker_CameraTrax = np.asarray(
      [68., 127., 155., 66., 176., 168., 47., 174., 96., 103., 62., 41.,
       147., 71., 60., 25., 150., 166., 245., 204., 162., 120., 84., 52.]])
 
-ColorChecker_XRite = np.asarray(
+ColorCheckerRGB_XRite = np.asarray(
     [[115., 194., 98., 87., 133., 103., 214., 80., 193., 94., 157., 224.,
       56., 70., 175., 231., 187., 8., 243., 200., 160., 122., 85., 52.],
      [82., 150., 122., 108., 128., 189., 126., 91., 90., 60., 188., 163.,
