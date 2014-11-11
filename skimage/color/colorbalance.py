@@ -60,7 +60,10 @@ ColorChecker_XRite = np.asarray(
 def _classic_gamma_correction_model(colors, color_alpha, color_constant,
                                     color_gamma):
     """Apply color correction to a given list of colors.
-    This uses classic gamma correction algorithm.
+    This uses classic gamma correction algorithm:
+       |R_out|   |alpha_R    0       0   |   |R_in|^|gamma_R|   |beta_R|
+       |G_out| = |   0    alpha_G    0   | * |G_in| |gamma_G| + |beta_G|
+       |B_out|   |   0       0    alpha_B|   |B_in| |gamma_B|   |beta_B|
 
     """
     assert(colors.shape[0] == 3)
@@ -79,7 +82,14 @@ def _classic_gamma_correction_model(colors, color_alpha, color_constant,
 def _gamma_correction_model(colors, color_alpha, color_constant,
                             color_gamma):
     """Apply color correction to a given list of colors.
-    This uses a modified gamma correction algorithm.
+    This uses a modified gamma correction algorithm:
+       |R_out'|   |alpha_11 alpha_12 alpha_13|   |R_in|   |beta_R|
+       |G_out'| = |alpha_21 alpha_22 alpha_23| * |G_in| + |beta_G|
+       |B_out'|   |alpha_31 alpha_32 alpha_33|   |B_in|   |beta_B|
+
+       |R_out|         |R_out'/255|^|gamma_R|
+       |G_out| = 255 * |G_out'/255| |gamma_G|
+       |B_out|         |B_out'/255| |gamma_B|
 
     """
     assert(colors.shape[0] == 3)
