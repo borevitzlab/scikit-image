@@ -237,6 +237,9 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
     color_gamma : ndarray
         The gamma coefficient or the exponential component of
         correction function.
+    algorithm : string
+        The correction algorithm, either `classic_gamma_correction` or
+        `gamma_correction`
 
     Returns
     -------
