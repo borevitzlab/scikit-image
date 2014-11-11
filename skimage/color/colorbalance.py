@@ -6,7 +6,7 @@ Functions for color balance using colorchecker/color card.
 
 Color correction implements two gamma correction algorithms described in [1].
 The new gamma correction algorithm yields much better accuracy than the classic
-one. Ground true RGB values of CameraTrax color card [2] and X-Rite
+one. Ground-truth RGB values of CameraTrax color card [2] and X-Rite
 colorchecker are included.
 
 
@@ -142,7 +142,7 @@ def get_color_correction_parameters(true_colors, actual_colors,
     Parameters
     ----------
     true_colors : ndarray
-        The input ground true colors.
+        The input ground-truth colors.
     actual_colors : ndarray
         The input actual color as captured in image.
     algorithm : string
@@ -325,7 +325,7 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
     >>> plt.title("Corrected color card")
     >>> plt.figure()
     >>> plt.imshow(true_color_card)
-    >>> plt.title("Ground-true color card")
+    >>> plt.title("Ground-truth color card")
     >>> plt.show()
     """
     # first turn it to [M*N, 3] matrix, then [3,M*N] matrix
@@ -382,5 +382,5 @@ def _demo():
     plt.title("Corrected color card")
     plt.figure()
     plt.imshow(true_color_card)
-    plt.title("Ground-true color card")
+    plt.title("Ground-truth color card")
     plt.show()
