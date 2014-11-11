@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-Functions for color balance using colorchecker/color card.
+Color balance using colorchecker/color card.
 
-Color correction implements two gamma correction algorithms described in [1].
+Color balance includes two gamma correction algorithms described in [1].
 The new gamma correction algorithm yields much better accuracy than the classic
-one. Ground-truth RGB values of CameraTrax color card [2] and X-Rite
-colorchecker [3] are included.
+one. Ground-truth RGB values of CameraTrax [2] and X-Rite colorchecker [3]
+are also included.
 
 
 The API consists of functions to:
@@ -59,7 +59,7 @@ ColorCheckerRGB_XRite = np.asarray(
 
 def _classic_gamma_correction_model(colors, color_alpha, color_constant,
                                     color_gamma):
-    """Apply color correction to a given list of colors.
+    """Apply color correction to a list of colors.
     This uses classic gamma correction algorithm:
        |R_out|   |alpha_R    0       0   |   |R_in|^|gamma_R|   |beta_R|
        |G_out| = |   0    alpha_G    0   | * |G_in| |gamma_G| + |beta_G|
@@ -81,7 +81,7 @@ def _classic_gamma_correction_model(colors, color_alpha, color_constant,
 
 def _gamma_correction_model(colors, color_alpha, color_constant,
                             color_gamma):
-    """Apply color correction to a given list of colors.
+    """Apply color correction to a list of colors.
     This uses a modified gamma correction algorithm:
        |R_out'|   |alpha_11 alpha_12 alpha_13|   |R_in|   |beta_R|
        |G_out'| = |alpha_21 alpha_22 alpha_23| * |G_in| + |beta_G|
@@ -107,7 +107,7 @@ def _gamma_correction_model(colors, color_alpha, color_constant,
 
 
 def _get_color_error(args2, true_colors, actual_colors, algorithm):
-    """Calculated the color error after applying color correction.
+    """Calculated color error after applying color correction.
     This function is used in `get_color_correction_parameters` function.
 
     """
@@ -141,13 +141,13 @@ def get_color_correction_parameters(true_colors, actual_colors,
 
     Parameters
     ----------
-    true_colors : ndarray
+    true_colors : 3xN ndarray
         The input ground-truth colors.
-    actual_colors : ndarray
+    actual_colors : 3xN ndarray
         The input actual color as captured in image.
     algorithm : string
         The correction algorithm, either `classic_gamma_correction` or
-        `gamma_correction`
+        `gamma_correction` (default)
 
     Returns
     -------
@@ -200,18 +200,18 @@ def get_color_correction_parameters(true_colors, actual_colors,
 
 def get_colorcard_colors(color_card, grid_size):
     """Extract color information from a cropped image of a color card.
-    The color card is a pallette containing squares of different colors.
+    containing squares of different colors.
 
     Parameters
     ----------
     color_card : ndarray
         The input cropped image containing only color card.
     grid_size : list, [horizontal_grid_size, vertical_grid_size]
-        The grid size of .
+        The number of columns and rows in color card.
 
     Returns
     -------
-    colors : ndarray
+    colors : 3xN ndarray
         List of colors with color channels go along the first array axis.
     """
     grid_cols, grid_rows = grid_size
@@ -234,7 +234,7 @@ def get_colorcard_colors(color_card, grid_size):
 
 def correct_color(image, color_alpha, color_constant, color_gamma,
                   algorithm="gamma_correction"):
-    """Apply color correction function to an input image.
+    """Apply color correction to an image.
 
     Parameters
     ----------
@@ -249,7 +249,7 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
         correction function.
     algorithm : string
         The correction algorithm, either `classic_gamma_correction` or
-        `gamma_correction`
+        `gamma_correction` (default)
 
     Returns
     -------
