@@ -263,15 +263,17 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
 if __name__ == "__main__":
     from skimage import data_dir
     import os.path
-    from skimage.io import imread
+    from skimage.io import imread, imsave
     import matplotlib.pylab as plt
     from timeit import default_timer as timer
 
-    color_card = 255.0*imread(os.path.join(data_dir, 'cropped_color_card.png'))
+    color_card = imread(os.path.join(data_dir, 'cropped_color_card.png'),
+                        plugin="freeimage")
     actual_colors = get_colorcard_colors(color_card, grid_size=[6, 4])
 #    true_colors = CameraTrax_24ColorCard
-    true_color_card = 255.0*imread(os.path.join(data_dir,
-                                   'CameraTrax_24ColorCard_2x3in.png'))
+    true_color_card = imread(os.path.join(data_dir,
+                                          'CameraTrax_24ColorCard_2x3in.png'),
+                             plugin="freeimage")
     true_colors = get_colorcard_colors(true_color_card, grid_size=[6, 4])
 
     start = timer()
@@ -282,7 +284,7 @@ if __name__ == "__main__":
     dt = timer() - start
     print("Parameter estimation and color correction takes {} s".format(dt))
     print(color_alpha, color_constant, color_gamma)
-
+    imsave(os.path.join(data_dir, 'corrected_color_card.png'), corrected_image)
     plt.figure()
     plt.imshow(color_card.astype(np.uint8))
     plt.figure()
