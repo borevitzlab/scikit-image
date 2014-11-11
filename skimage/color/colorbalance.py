@@ -286,7 +286,7 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
            [ 147.,  238.,  255.,  126.,  255.,  246.,  117.,  255.,  236.,
              247.,  129.,  111.,  255.,  150.,  157.,  117.,  255.,  252.,
              255.,  255.,  249.,  232.,  181.,  118.]])
-    >>> true_color_card = \
+    >>> true_color_card =
     ...     imread(os.path.join(data_dir,
     ...                         'CameraTrax_24ColorCard_2x3in.png'),
     ...            plugin="freeimage")
@@ -301,7 +301,7 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
            [  68.,  127.,  155.,   66.,  176.,  168.,   47.,  174.,   96.,
              103.,   62.,   41.,  147.,   71.,   60.,   25.,  150.,  166.,
              245.,  204.,  162.,  120.,   84.,   52.]])
-    >>> color_alpha, color_constant, color_gamma = \
+    >>> color_alpha, color_constant, color_gamma =
     ...     get_color_correction_parameters(true_colors, actual_colors)
     >>> color_alpha
     array([[ 0.98609494,  0.1093022 , -0.13196349],
