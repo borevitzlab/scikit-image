@@ -54,6 +54,10 @@ from .delta_e import (deltaE_cie76,
                       deltaE_cmc,
                       )
 
+from .colorbalance import (get_colorcard_colors,
+                           get_color_correction_parameters,
+                           correct_color)
+
 
 __all__ = ['convert_colorspace',
            'guess_spatial_dimensions',
@@ -104,4 +108,7 @@ __all__ = ['convert_colorspace',
            'deltaE_ciede94',
            'deltaE_ciede2000',
            'deltaE_cmc',
+           'get_colorcard_colors',
+           'get_color_correction_parameters',
+           'correct_color'
            ]

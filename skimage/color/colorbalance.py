@@ -2,18 +2,18 @@
 # -*- coding: utf-8 -*-
 
 """
-Functions for correcting color using color pallette.
+Functions for color balance using colorchecker/color card.
 
-Color correction implements Gamma Correction algorithm described in [1].
+Color correction implements two gamma correction algorithms described in [1].
 The new gamma correction algorithm yields much better accuracy than the classic
-one.
+one. Ground true RGB values of CameraTrax color card [2] is included.
 
 
 The API consists of functions to:
 * Extract colors from cropped image of a known color pallette.
 * Estimate coefficient matrices of correction function
 * Apply correction function to a image captured in the same condition as the
-  input color pallette.
+  input color card.
 
 
 Supported color spaces
@@ -29,6 +29,7 @@ References
 ----------
 .. [1] Constantinou2013 - A comparison of color correction algorithms for
        endoscopic cameras
+.. [2] CameraTrax color card - https://www.cameratrax.com/color_balance_2x3.php
 """
 
 from __future__ import division
@@ -36,6 +37,7 @@ from __future__ import division
 import numpy as np
 from scipy import optimize
 
+# This is ground true values for CameraTrax color card
 CameraTrax_24ColorCard = np.asarray(
     [[115., 196., 91., 94., 129., 98., 223., 58., 194., 93., 162., 229.,
       49., 77., 173., 241., 190., 0., 242., 203., 162., 120., 84., 50.],
@@ -235,10 +237,73 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
     ------
     ValueError
         If the input algorithm is not supported.
+
+
+    Examples
+    --------
+    Correct color of CameraTrax color card
+
+    >>> import os.path
+    >>> from skimage.color import (get_colorcard_colors,
+    ...                            get_color_correction_parameters,
+    ...                            correct_color)
+    >>> from skimage import data_dir
+    >>> from skimage.io import imread, imsave
+    >>> import matplotlib.pylab as plt
+    >>> color_card = imread(os.path.join(data_dir, 'cropped_color_card.png'),
+    ...                     plugin="freeimage")
+    >>> actual_colors = get_colorcard_colors(color_card, grid_size=[6, 4])
+    >>> actual_colors
+    array([[ 202.,  255.,  208.,  157.,  237.,  214.,  255.,  214.,  255.,
+             211.,  227.,  255.,  178.,  157.,  255.,  255.,  255.,  178.,
+             255.,  251.,  240.,  214.,  165.,   99.],
+           [ 104.,  186.,  164.,  162.,  176.,  230.,  168.,  123.,  112.,
+              68.,  232.,  210.,   77.,  213.,   72.,  235.,  124.,  186.,
+             252.,  236.,  208.,  163.,  114.,   56.],
+           [ 147.,  238.,  255.,  126.,  255.,  246.,  117.,  255.,  236.,
+             247.,  129.,  111.,  255.,  150.,  157.,  117.,  255.,  252.,
+             255.,  255.,  249.,  232.,  181.,  118.]])
+    >>> true_color_card = \
+    ...     imread(os.path.join(data_dir,
+    ...                         'CameraTrax_24ColorCard_2x3in.png'),
+    ...            plugin="freeimage")
+    >>> true_colors = get_colorcard_colors(true_color_card, grid_size=[6, 4])
+    >>> true_colors
+    array([[ 115.,  196.,   91.,   94.,  129.,   98.,  223.,   58.,  194.,
+              93.,  162.,  229.,   49.,   77.,  173.,  241.,  190.,    0.,
+             242.,  203.,  162.,  120.,   84.,   50.],
+           [  83.,  147.,  122.,  108.,  128.,  190.,  124.,   92.,   82.,
+              60.,  190.,  158.,   66.,  153.,   57.,  201.,   85.,  135.,
+             243.,  203.,  163.,  120.,   84.,   50.],
+           [  68.,  127.,  155.,   66.,  176.,  168.,   47.,  174.,   96.,
+             103.,   62.,   41.,  147.,   71.,   60.,   25.,  150.,  166.,
+             245.,  204.,  162.,  120.,   84.,   52.]])
+    >>> color_alpha, color_constant, color_gamma = \
+    ...     get_color_correction_parameters(true_colors, actual_colors)
+    >>> color_alpha
+    array([[ 0.98609494,  0.1093022 , -0.13196349],
+           [ 0.07417578,  0.65261063,  0.03358806],
+           [-0.09229596,  0.25357092,  0.75431669]])
+    >>> color_constant
+    array([[-10.38953662],
+           [ 45.40771496],
+           [ -6.64889069]])
+    >>> color_gamma
+    array([[ 2.69716508],
+           [ 1.94444779],
+           [ 2.05671531]])
+    >>> corrected_image = correct_color(color_card, color_alpha,
+    ...                                 color_constant, color_gamma)
+    >>> plt.figure()
+    >>> plt.imshow(color_card)
+    >>> plt.figure()
+    >>> plt.imshow(corrected_image)
+    >>> plt.figure()
+    >>> plt.imshow(true_color_card)
+    >>> plt.show()
     """
     # first turn it to [M*N, 3] matrix, then [3,M*N] matrix
     colors = image.reshape([image.shape[0] * image.shape[1], 3])
-    print("max(image) = {}".format(np.max(image)))
     colors = colors.transpose()
 
     if algorithm == "classic_gamma_correction":
@@ -258,35 +323,3 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
                                                 image.shape[1], 3])
     corrected_image = np.clip(corrected_image, 0, 255).astype(np.uint8)
     return corrected_image
-
-
-if __name__ == "__main__":
-    from skimage import data_dir
-    import os.path
-    from skimage.io import imread, imsave
-    import matplotlib.pylab as plt
-    from timeit import default_timer as timer
-
-    color_card = imread(os.path.join(data_dir, 'cropped_color_card.png'),
-                        plugin="freeimage")
-    actual_colors = get_colorcard_colors(color_card, grid_size=[6, 4])
-#    true_colors = CameraTrax_24ColorCard
-    true_color_card = imread(os.path.join(data_dir,
-                                          'CameraTrax_24ColorCard_2x3in.png'),
-                             plugin="freeimage")
-    true_colors = get_colorcard_colors(true_color_card, grid_size=[6, 4])
-
-    start = timer()
-    color_alpha, color_constant, color_gamma = \
-        get_color_correction_parameters(true_colors, actual_colors)
-    corrected_image = correct_color(color_card, color_alpha, color_constant,
-                                    color_gamma)
-    dt = timer() - start
-    print("Parameter estimation and color correction takes {} s".format(dt))
-    print(color_alpha, color_constant, color_gamma)
-    imsave(os.path.join(data_dir, 'corrected_color_card.png'), corrected_image)
-    plt.figure()
-    plt.imshow(color_card.astype(np.uint8))
-    plt.figure()
-    plt.imshow(corrected_image)
-    plt.show()

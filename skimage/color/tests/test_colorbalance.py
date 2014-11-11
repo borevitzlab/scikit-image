@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 10 11:57:01 2014
-
-@author: chuong
-"""
-
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
@@ -12,7 +5,7 @@ Created on Mon Nov 10 11:57:01 2014
 
 Authors
 -------
-- the rgb2hsv test was written by Chuong Nguyen, 2014
+- the colorbalance test was written by Chuong Nguyen, 2014
 
 :license: modified BSD
 """
@@ -20,55 +13,58 @@ Authors
 import os.path
 
 import numpy as np
-from numpy.testing import (assert_equal,
-                           assert_almost_equal,
-                           assert_array_almost_equal,
-                           assert_raises,
+from numpy.testing import (assert_array_almost_equal,
                            TestCase,
                            )
 
-from skimage import img_as_float, img_as_ubyte
 from skimage.io import imread
-from skimage import data_dir, data
+from skimage import data_dir
 from skimage.color import (get_colorcard_colors,
                            get_color_correction_parameters,
                            correct_color)
 
 
 class TestColorbalance(TestCase):
-    img_rgb = imread(os.path.join(data_dir, 'cropped_color_card.png'))
-    color_card = img_rgb[743:829, 1284:1415]
+    # input data
+    color_card = imread(os.path.join(data_dir, 'cropped_color_card.png'),
+                        plugin="freeimage")
     actual_colors = get_colorcard_colors(color_card, grid_size=[6, 4])
-    true_color_card = 255.0*imread(os.path.join(data_dir,
-                                   'CameraTrax_24ColorCard_2x3in.png'))
+    true_color_card = imread(os.path.join(data_dir,
+                                          'CameraTrax_24ColorCard_2x3in.png'),
+                             plugin="freeimage")
     true_colors = get_colorcard_colors(true_color_card, grid_size=[6, 4])
 
-
-    color_alpha_array = np.array([[0.98844109, 0.1113885, -0.13325764],
-                                  [0.07231765, 0.66030949, 0.03172648],
-                                  [-0.09717971, 0.25484042, 0.76104714]])
-    color_constant_array = np.array([[-11.22658842],
-                                     [43.58277321],
-                                     [-8.24595865]])
-    color_gamma_array = np.array([[2.67669598],
-                                  [1.90837229],
-                                  [2.02217615]])
+    # predicted results
+    color_alpha = np.array([[0.98609494, 0.1093022, -0.13196349],
+                           [0.07417578, 0.65261063, 0.03358806],
+                           [-0.09229596, 0.25357092, 0.75431669]])
+    color_constant = np.array([[-10.38953662],
+                               [45.40771496],
+                               [-6.64889069]])
+    color_gamma = np.array([[2.69716508],
+                           [1.94444779],
+                           [2.05671531]])
+    corrected_color_card = imread(os.path.join(data_dir,
+                                               'corrected_color_card.png'),
+                                  plugin="freeimage")
 
     def test_get_color_correction_parameters(self):
-        self.color_alpha, self.color_constant, self.color_gamma = \
+        color_alpha, color_constant, color_gamma = \
             get_color_correction_parameters(self.true_colors,
                                             self.actual_colors)
-        assert_array_almost_equal(self.color_alpha, self.color_alpha_array)
-        assert_array_almost_equal(self.color_constant,
-                                  self.color_constant_array)
-        assert_array_almost_equal(self.color_gamma, self.color_gamma_array)
+        assert_array_almost_equal(color_alpha, self.color_alpha)
+        assert_array_almost_equal(color_constant, self.color_constant)
+        assert_array_almost_equal(color_gamma, self.color_gamma)
 
     def test_correct_color(self):
-        self.corrected_color_card = \
+        color_alpha, color_constant, color_gamma = \
+            get_color_correction_parameters(self.true_colors,
+                                            self.actual_colors)
+        corrected_color_card = \
             correct_color(self.color_card, self.color_alpha,
                           self.color_constant, self.color_gamma)
-        assert_array_almost_equal(self.corrected_color_card,
-                                  self.true_color_card)
+        assert_array_almost_equal(corrected_color_card,
+                                  self.corrected_color_card)
 
 if __name__ == "__main__":
     from numpy.testing import run_module_suite
