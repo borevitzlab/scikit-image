@@ -296,10 +296,13 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
     ...                                 color_constant, color_gamma)
     >>> plt.figure()
     >>> plt.imshow(color_card)
+    >>> plt.title("Input color card")
     >>> plt.figure()
     >>> plt.imshow(corrected_image)
+    >>> plt.title("Corrected color card")
     >>> plt.figure()
     >>> plt.imshow(true_color_card)
+    >>> plt.title("Ground-true color card")
     >>> plt.show()
     """
     # first turn it to [M*N, 3] matrix, then [3,M*N] matrix
@@ -323,3 +326,38 @@ def correct_color(image, color_alpha, color_constant, color_gamma,
                                                 image.shape[1], 3])
     corrected_image = np.clip(corrected_image, 0, 255).astype(np.uint8)
     return corrected_image
+
+
+def _demo():
+    import os.path
+    from skimage.color import (get_colorcard_colors,
+                               get_color_correction_parameters,
+                               correct_color)
+    from skimage import data_dir
+    from skimage.io import imread, imsave
+    import matplotlib.pylab as plt
+
+    color_card = imread(os.path.join(data_dir, 'cropped_color_card.png'),
+                        plugin="freeimage")
+    actual_colors = get_colorcard_colors(color_card, grid_size=[6, 4])
+    true_color_card = \
+        imread(os.path.join(data_dir,
+                            'CameraTrax_24ColorCard_2x3in.png'),
+               plugin="freeimage")
+    true_colors = get_colorcard_colors(true_color_card, grid_size=[6, 4])
+
+    color_alpha, color_constant, color_gamma = \
+        get_color_correction_parameters(true_colors, actual_colors)
+    corrected_image = correct_color(color_card, color_alpha, color_constant,
+                                    color_gamma)
+    imsave(os.path.join(data_dir, 'corrected_color_card.png'), corrected_image)
+    plt.figure()
+    plt.imshow(color_card)
+    plt.title("Input color card")
+    plt.figure()
+    plt.imshow(corrected_image)
+    plt.title("Corrected color card")
+    plt.figure()
+    plt.imshow(true_color_card)
+    plt.title("Ground-true color card")
+    plt.show()
