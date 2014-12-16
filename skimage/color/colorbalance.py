@@ -22,9 +22,6 @@ Supported color spaces
 * RGB : Red Green Blue.
 * Other 3-channels color spaces
 
-:author: Chuong Nguyen
-
-:license: modified BSD
 
 References
 ----------

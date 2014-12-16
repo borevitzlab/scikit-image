@@ -2,12 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """Tests for color balance functions.
-
-Authors
--------
-- the colorbalance test was written by Chuong Nguyen, 2014
-
-:license: modified BSD
 """
 
 import os.path
