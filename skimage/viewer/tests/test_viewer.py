@@ -4,7 +4,7 @@ from skimage.viewer.qt import QtGui, QtCore
 from skimage.viewer import ImageViewer, CollectionViewer, viewer_available
 from skimage.transform import pyramid_gaussian
 from skimage.viewer.plugins import OverlayPlugin
-from skimage.filter import sobel
+from skimage.filters import sobel
 from numpy.testing import assert_equal
 from numpy.testing.decorators import skipif
 from skimage._shared.version_requirements import is_installed
@@ -12,10 +12,10 @@ from skimage._shared.version_requirements import is_installed
 
 @skipif(not viewer_available)
 def test_viewer():
-    lena = data.lena()
+    astro = data.astronaut()
     coins = data.coins()
 
-    view = ImageViewer(lena)
+    view = ImageViewer(astro)
     import tempfile
     _, filename = tempfile.mkstemp(suffix='.png')
 
@@ -23,7 +23,7 @@ def test_viewer():
     view.close()
     view.save_to_file(filename)
     view.open_file(filename)
-    assert_equal(view.image, lena)
+    assert_equal(view.image, astro)
     view.image = coins
     assert_equal(view.image, coins),
     view.save_to_file(filename),
@@ -40,7 +40,7 @@ def make_key_event(key):
 @skipif(not viewer_available)
 def test_collection_viewer():
 
-    img = data.lena()
+    img = data.astronaut()
     img_collection = tuple(pyramid_gaussian(img))
 
     view = CollectionViewer(img_collection)
@@ -74,4 +74,3 @@ def test_viewer_with_overlay():
     ov.overlay = img
     assert_equal(ov.overlay, img)
     assert_equal(ov.filtered_image, img)
-

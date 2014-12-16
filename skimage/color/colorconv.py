@@ -119,8 +119,8 @@ def convert_colorspace(arr, fromspace, tospace):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = convert_colorspace(lena, 'RGB', 'HSV')
+    >>> img = data.astronaut()
+    >>> img_hsv = convert_colorspace(img, 'RGB', 'HSV')
     """
     fromdict = {'RGB': lambda im: im, 'HSV': hsv2rgb, 'RGB CIE': rgbcie2rgb,
                 'XYZ': xyz2rgb}
@@ -186,8 +186,8 @@ def rgb2hsv(rgb):
     --------
     >>> from skimage import color
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = color.rgb2hsv(lena)
+    >>> img = data.astronaut()
+    >>> img_hsv = color.rgb2hsv(img)
     """
     arr = _prepare_colorarray(rgb)
     out = np.empty_like(arr)
@@ -263,9 +263,9 @@ def hsv2rgb(hsv):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_hsv = rgb2hsv(lena)
-    >>> lena_rgb = hsv2rgb(lena_hsv)
+    >>> img = data.astronaut()
+    >>> img_hsv = rgb2hsv(img)
+    >>> img_rgb = hsv2rgb(img_hsv)
     """
     arr = _prepare_colorarray(hsv)
 
@@ -299,8 +299,8 @@ sb_primaries = np.array([1. / 155, 1. / 190, 1. / 225]) * 1e5
 
 # From sRGB specification
 xyz_from_rgb = np.array([[0.412453, 0.357580, 0.180423],
-                        [0.212671, 0.715160, 0.072169],
-                        [0.019334, 0.119193, 0.950227]])
+                         [0.212671, 0.715160, 0.072169],
+                         [0.019334, 0.119193, 0.950227]])
 
 rgb_from_xyz = linalg.inv(xyz_from_rgb)
 
@@ -542,9 +542,9 @@ def xyz2rgb(xyz):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2rgb
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_rgb = xyz2rgb(lena_xyz)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_rgb = xyz2rgb(img_xyz)
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
@@ -587,8 +587,8 @@ def rgb2xyz(rgb):
     Examples
     --------
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
     """
     # Follow the algorithm from http://www.easyrgb.com/index.php
     # except we don't multiply/divide by 100 in the conversion
@@ -625,8 +625,8 @@ def rgb2rgbcie(rgb):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie
-    >>> lena = data.lena()
-    >>> lena_rgbcie = rgb2rgbcie(lena)
+    >>> img = data.astronaut()
+    >>> img_rgbcie = rgb2rgbcie(img)
     """
     return _convert(rgbcie_from_rgb, rgb)
 
@@ -657,9 +657,9 @@ def rgbcie2rgb(rgbcie):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2rgbcie, rgbcie2rgb
-    >>> lena = data.lena()
-    >>> lena_rgbcie = rgb2rgbcie(lena)
-    >>> lena_rgb = rgbcie2rgb(lena_rgbcie)
+    >>> img = data.astronaut()
+    >>> img_rgbcie = rgb2rgbcie(img)
+    >>> img_rgb = rgbcie2rgb(img_rgbcie)
     """
     return _convert(rgb_from_rgbcie, rgbcie)
 
@@ -701,8 +701,8 @@ def rgb2gray(rgb):
     --------
     >>> from skimage.color import rgb2gray
     >>> from skimage import data
-    >>> lena = data.lena()
-    >>> lena_gray = rgb2gray(lena)
+    >>> img = data.astronaut()
+    >>> img_gray = rgb2gray(img)
     """
     if rgb.ndim == 2:
         return rgb
@@ -782,10 +782,9 @@ def xyz2lab(xyz, illuminant="D65", observer="2"):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2lab
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_lab = xyz2lab(lena_xyz)
-
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_lab = xyz2lab(img_xyz)
     """
     arr = _prepare_colorarray(xyz)
 
@@ -961,9 +960,9 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2xyz, xyz2luv
-    >>> lena = data.lena()
-    >>> lena_xyz = rgb2xyz(lena)
-    >>> lena_luv = xyz2luv(lena_xyz)
+    >>> img = data.astronaut()
+    >>> img_xyz = rgb2xyz(img)
+    >>> img_luv = xyz2luv(img_xyz)
     """
     arr = _prepare_colorarray(xyz)
 
@@ -979,19 +978,19 @@ def xyz2luv(xyz, illuminant="D65", observer="2"):
     L[mask] = 116. * np.power(L[mask], 1. / 3.) - 16.
     L[~mask] = 903.3 * L[~mask]
 
-    u0 = 4*xyz_ref_white[0] / np.dot([1, 15, 3], xyz_ref_white)
-    v0 = 9*xyz_ref_white[1] / np.dot([1, 15, 3], xyz_ref_white)
+    u0 = 4 * xyz_ref_white[0] / np.dot([1, 15, 3], xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / np.dot([1, 15, 3], xyz_ref_white)
 
     # u' and v' helper functions
     def fu(X, Y, Z):
-        return (4.*X) / (X + 15.*Y + 3.*Z + eps)
+        return (4. * X) / (X + 15. * Y + 3. * Z + eps)
 
     def fv(X, Y, Z):
-        return (9.*Y) / (X + 15.*Y + 3.*Z + eps)
+        return (9. * Y) / (X + 15. * Y + 3. * Z + eps)
 
     # compute u and v using helper functions
-    u = 13.*L * (fu(x, y, z) - u0)
-    v = 13.*L * (fv(x, y, z) - v0)
+    u = 13. * L * (fu(x, y, z) - u0)
+    v = 13. * L * (fv(x, y, z) - v0)
 
     return np.concatenate([q[..., np.newaxis] for q in [L, u, v]], axis=-1)
 
@@ -1044,24 +1043,24 @@ def luv2xyz(luv, illuminant="D65", observer="2"):
     # compute y
     y = L.copy()
     mask = y > 7.999625
-    y[mask] = np.power((y[mask]+16.) / 116., 3.)
+    y[mask] = np.power((y[mask] + 16.) / 116., 3.)
     y[~mask] = y[~mask] / 903.3
     xyz_ref_white = get_xyz_coords(illuminant, observer)
     y *= xyz_ref_white[1]
 
     # reference white x,z
     uv_weights = [1, 15, 3]
-    u0 = 4*xyz_ref_white[0] / np.dot(uv_weights, xyz_ref_white)
-    v0 = 9*xyz_ref_white[1] / np.dot(uv_weights, xyz_ref_white)
+    u0 = 4 * xyz_ref_white[0] / np.dot(uv_weights, xyz_ref_white)
+    v0 = 9 * xyz_ref_white[1] / np.dot(uv_weights, xyz_ref_white)
 
     # compute intermediate values
-    a = u0 + u / (13.*L + eps)
-    b = v0 + v / (13.*L + eps)
-    c = 3*y * (5*b-3)
+    a = u0 + u / (13. * L + eps)
+    b = v0 + v / (13. * L + eps)
+    c = 3 * y * (5 * b - 3)
 
     # compute x and z
-    z = ((a-4)*c - 15*a*b*y) / (12*b)
-    x = -(c/b + 3.*z)
+    z = ((a - 4) * c - 15 * a * b * y) / (12 * b)
+    x = -(c / b + 3. * z)
 
     return np.concatenate([q[..., np.newaxis] for q in [x, y, z]], axis=-1)
 
@@ -1339,9 +1338,9 @@ def lab2lch(lab):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2lab, lab2lch
-    >>> lena = data.lena()
-    >>> lena_lab = rgb2lab(lena)
-    >>> lena_lch = lab2lch(lena_lab)
+    >>> img = data.astronaut()
+    >>> img_lab = rgb2lab(img)
+    >>> img_lch = lab2lch(img_lab)
     """
     lch = _prepare_lab_array(lab)
 
@@ -1386,10 +1385,10 @@ def lch2lab(lch):
     --------
     >>> from skimage import data
     >>> from skimage.color import rgb2lab, lch2lab
-    >>> lena = data.lena()
-    >>> lena_lab = rgb2lab(lena)
-    >>> lena_lch = lab2lch(lena_lab)
-    >>> lena_lab2 = lch2lab(lena_lch)
+    >>> img = data.astronaut()
+    >>> img_lab = rgb2lab(img)
+    >>> img_lch = lab2lch(img_lab)
+    >>> img_lab2 = lch2lab(img_lch)
     """
     lch = _prepare_lab_array(lch)
 

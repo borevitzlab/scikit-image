@@ -13,7 +13,7 @@ extracted and a histogram of its greyscale values is computed.
 
 Next, for each pixel in the test image, a histogram of the greyscale values in
 a region of the image surrounding the pixel is computed.
-`skimage.filter.rank.windowed_histogram` is used for this task, as it employs
+`skimage.filters.rank.windowed_histogram` is used for this task, as it employs
 an efficient sliding window based algorithm that is able to compute these
 histograms quickly [2]_. The local histogram for the region surrounding each
 pixel in the image is compared to that of the single coin, with a similarity
@@ -42,7 +42,7 @@ import matplotlib.pyplot as plt
 from skimage import data, transform
 from skimage.util import img_as_ubyte
 from skimage.morphology import disk
-from skimage.filter import rank
+from skimage.filters import rank
 
 
 matplotlib.rcParams['font.size'] = 9
@@ -60,10 +60,12 @@ def windowed_histogram_similarity(image, selem, reference_hist, n_bins):
     # a measure of distance between histograms
     X = px_histograms
     Y = reference_hist
+
     num = (X - Y) ** 2
     denom = X + Y
+    denom[denom == 0] = np.infty
     frac = num / denom
-    frac[denom == 0] = 0
+
     chi_sqr = 0.5 * np.sum(frac, axis=2)
 
     # Generate a similarity measure. It needs to be low when distance is high

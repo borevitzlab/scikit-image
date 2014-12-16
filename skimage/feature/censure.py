@@ -31,7 +31,7 @@ STAR_FILTER_SHAPE = [(1, 0), (3, 1), (4, 2), (5, 3), (7, 4), (8, 5),
 def _filter_image(image, min_scale, max_scale, mode):
 
     response = np.zeros((image.shape[0], image.shape[1],
-                        max_scale - min_scale + 1), dtype=np.double)
+                         max_scale - min_scale + 1), dtype=np.double)
 
     if mode == 'dob':
 
@@ -48,8 +48,8 @@ def _filter_image(image, min_scale, max_scale, mode):
             # Constant multipliers for the outer region and the inner region
             # of the bi-level filters with the constraint of keeping the
             # DC bias 0.
-            inner_weight = (1.0 / (2 * n + 1)**2)
-            outer_weight = (1.0 / (12 * n**2 + 4 * n))
+            inner_weight = (1.0 / (2 * n + 1) ** 2)
+            outer_weight = (1.0 / (12 * n ** 2 + 4 * n))
 
             _censure_dob_loop(n, integral_img, response[:, :, i],
                               inner_weight, outer_weight)
@@ -79,8 +79,8 @@ def _filter_image(image, min_scale, max_scale, mode):
 
 
 def _octagon_kernel(mo, no, mi, ni):
-    outer = (mo + 2 * no)**2 - 2 * no * (no + 1)
-    inner = (mi + 2 * ni)**2 - 2 * ni * (ni + 1)
+    outer = (mo + 2 * no) ** 2 - 2 * no * (no + 1)
+    inner = (mi + 2 * ni) ** 2 - 2 * ni * (ni + 1)
     outer_weight = 1.0 / (outer - inner)
     inner_weight = 1.0 / inner
     c = ((mo + 2 * no) - (mi + 2 * ni)) // 2
@@ -108,7 +108,6 @@ def _suppress_lines(feature_mask, image, sigma, line_threshold):
     Axx, Axy, Ayy = structure_tensor(image, sigma)
     feature_mask[(Axx + Ayy) ** 2
                  > line_threshold * (Axx * Ayy - Axy ** 2)] = False
-
 
 
 class CENSURE(FeatureDetector):
@@ -160,30 +159,38 @@ class CENSURE(FeatureDetector):
 
     Examples
     --------
-    >>> from skimage.data import lena
+    >>> from skimage.data import astronaut
     >>> from skimage.color import rgb2gray
     >>> from skimage.feature import CENSURE
-    >>> img = rgb2gray(lena()[100:300, 100:300])
+    >>> img = rgb2gray(astronaut()[100:300, 100:300])
     >>> censure = CENSURE()
     >>> censure.detect(img)
     >>> censure.keypoints
-    array([[ 71, 148],
-           [ 77, 186],
-           [ 78, 189],
-           [ 89, 174],
-           [127, 134],
-           [131, 133],
-           [134, 125],
-           [137, 125],
-           [149,  36],
-           [162, 165],
-           [168, 167],
-           [170,   5],
-           [171,  29],
-           [179,  20],
-           [194,  65]])
+    array([[  4, 148],
+           [ 12,  73],
+           [ 21, 176],
+           [ 91,  22],
+           [ 93,  56],
+           [ 94,  22],
+           [ 95,  54],
+           [100,  51],
+           [103,  51],
+           [106,  67],
+           [108,  15],
+           [117,  20],
+           [122,  60],
+           [125,  37],
+           [129,  37],
+           [133,  76],
+           [145,  44],
+           [146,  94],
+           [150, 114],
+           [153,  33],
+           [154, 156],
+           [155, 151],
+           [184,  63]])
     >>> censure.scales
-    array([2, 4, 2, 3, 4, 2, 2, 3, 4, 6, 3, 2, 3, 4, 2])
+    array([2, 6, 6, 2, 4, 3, 2, 3, 2, 6, 3, 2, 2, 3, 2, 2, 2, 3, 2, 2, 4, 2, 2])
 
     """
 

@@ -11,9 +11,9 @@ __all__ = ['histogram', 'cumulative_distribution', 'equalize_hist',
 
 DTYPE_RANGE = dtype_range.copy()
 DTYPE_RANGE.update((d.__name__, limits) for d, limits in dtype_range.items())
-DTYPE_RANGE.update({'uint10': (0, 2**10 - 1),
-                    'uint12': (0, 2**12 - 1),
-                    'uint14': (0, 2**14 - 1),
+DTYPE_RANGE.update({'uint10': (0, 2 ** 10 - 1),
+                    'uint12': (0, 2 ** 12 - 1),
+                    'uint14': (0, 2 ** 14 - 1),
                     'bool': dtype_range[np.bool_],
                     'float': dtype_range[np.float64]})
 
@@ -44,10 +44,14 @@ def histogram(image, nbins=256):
     bin_centers : array
         The values at the center of the bins.
 
+    See Also
+    --------
+    cumulative_distribution
+
     Examples
     --------
-    >>> from skimage import data, exposure, util
-    >>> image = util.img_as_float(data.camera())
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.camera())
     >>> np.histogram(image, bins=2)
     (array([107432, 154712]), array([ 0. ,  0.5,  1. ]))
     >>> exposure.histogram(image, nbins=2)
@@ -62,16 +66,25 @@ def histogram(image, nbins=256):
     # For integer types, histogramming with bincount is more efficient.
     if np.issubdtype(image.dtype, np.integer):
         offset = 0
-        if np.min(image) < 0:
-            offset = np.min(image)
-        hist = np.bincount(image.ravel() - offset)
+        image_min = np.min(image)
+        if image_min < 0:
+            offset = image_min
+            image_range = np.max(image).astype(np.int64) - image_min
+            # get smallest dtype that can hold both minimum and offset maximum
+            offset_dtype = np.promote_types(np.min_scalar_type(image_range),
+                                            np.min_scalar_type(image_min))
+            if image.dtype != offset_dtype:
+                # prevent overflow errors when offsetting
+                image = image.astype(offset_dtype)
+            image = image - offset
+        hist = np.bincount(image.ravel())
         bin_centers = np.arange(len(hist)) + offset
 
         # clip histogram to start with a non-zero bin
         idx = np.nonzero(hist)[0][0]
         return hist[idx:], bin_centers[idx:]
     else:
-        hist, bin_edges = np.histogram(image.flat, nbins)
+        hist, bin_edges = np.histogram(image.flat, bins=nbins)
         bin_centers = (bin_edges[:-1] + bin_edges[1:]) / 2.
         return hist, bin_centers
 
@@ -93,10 +106,22 @@ def cumulative_distribution(image, nbins=256):
     bin_centers : array
         Centers of bins.
 
+    See Also
+    --------
+    histogram
+
     References
     ----------
     .. [1] http://en.wikipedia.org/wiki/Cumulative_distribution_function
 
+    Examples
+    --------
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.camera())
+    >>> hi = exposure.histogram(image)
+    >>> cdf = exposure.cumulative_distribution(image)
+    >>> np.alltrue(cdf[0] == np.cumsum(hi[0])/float(image.size))
+    True
     """
     hist, bin_centers = histogram(image, nbins)
     img_cdf = hist.cumsum()
@@ -111,8 +136,10 @@ def equalize_hist(image, nbins=256, mask=None):
     ----------
     image : array
         Image array.
-    nbins : int
-        Number of bins for image histogram.
+    nbins : int, optional
+        Number of bins for image histogram. Note: this argument is
+        ignored for integer images, for which each integer is its own
+        bin.
     mask: ndarray of bools or 0s and 1s, optional
         Array of same shape as `image`. Only points at which mask == True
         are used for the equalization, which is applied to the whole image.
@@ -132,7 +159,6 @@ def equalize_hist(image, nbins=256, mask=None):
     .. [2] http://en.wikipedia.org/wiki/Histogram_equalization
 
     """
-    image = img_as_float(image)
     if mask is not None:
         mask = np.array(mask, dtype=bool)
         cdf, bin_centers = cumulative_distribution(image[mask], nbins)
@@ -215,6 +241,10 @@ def rescale_intensity(image, in_range='image', out_range='dtype'):
     out : array
         Image array after rescaling its intensity. This image is the same dtype
         as the input image.
+
+    See Also
+    --------
+    intensity_range, equalize_hist
 
     Examples
     --------
@@ -306,6 +336,10 @@ def adjust_gamma(image, gamma=1, gain=1):
     out : ndarray
         Gamma corrected output image.
 
+    See Also
+    --------
+    adjust_log
+
     Notes
     -----
     For gamma greater than 1, the histogram will shift towards left and
@@ -318,6 +352,14 @@ def adjust_gamma(image, gamma=1, gain=1):
     ----------
     .. [1] http://en.wikipedia.org/wiki/Gamma_correction
 
+    Examples
+    --------
+    >>> from skimage import data, exposure, img_as_float
+    >>> image = img_as_float(data.moon())
+    >>> gamma_corrected = exposure.adjust_gamma(image, 2)
+    >>> # Output is darker for gamma > 1
+    >>> image.mean() > gamma_corrected.mean()
+    True
     """
     _assert_non_negative(image)
     dtype = image.dtype.type
@@ -352,6 +394,10 @@ def adjust_log(image, gain=1, inv=False):
     -------
     out : ndarray
         Logarithm corrected output image.
+
+    See Also
+    --------
+    adjust_gamma
 
     References
     ----------
@@ -396,6 +442,10 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     out : ndarray
         Sigmoid corrected output image.
 
+    See Also
+    --------
+    adjust_gamma
+
     References
     ----------
     .. [1] Gustav J. Braun, "Image Lightness Rescaling Using Sigmoidal Contrast
@@ -408,8 +458,8 @@ def adjust_sigmoid(image, cutoff=0.5, gain=10, inv=False):
     scale = float(dtype_limits(image, True)[1] - dtype_limits(image, True)[0])
 
     if inv:
-        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+        out = (1 - 1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
         return dtype(out)
 
-    out = (1 / (1 + np.exp(gain * (cutoff - image/scale)))) * scale
+    out = (1 / (1 + np.exp(gain * (cutoff - image / scale)))) * scale
     return dtype(out)

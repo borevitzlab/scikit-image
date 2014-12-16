@@ -960,7 +960,7 @@ def warp_coords(coord_map, shape, dtype=np.float64):
     >>> def shift_up10_left20(xy):
     ...     return xy - np.array([-20, 10])[None, :]
     >>>
-    >>> image = data.lena().astype(np.float32)
+    >>> image = data.astronaut().astype(np.float32)
     >>> coords = warp_coords(shift_up10_left20, image.shape)
     >>> warped_image = map_coordinates(image, coords)
 
@@ -1111,8 +1111,8 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     >>> scale = 0.1
     >>> output_shape = (scale * cube_shape).astype(int)
-    >>> coords0, coords1, coords2 = \
-    ...     np.mgrid[:output_shape[0], :output_shape[1], :output_shape[2]]
+    >>> coords0, coords1, coords2 = np.mgrid[:output_shape[0],
+    ...                    :output_shape[1], :output_shape[2]]
     >>> coords = np.array([coords0, coords1, coords2])
 
     Assume that the cube contains spatial data, where the first array element
@@ -1134,7 +1134,18 @@ def warp(image, inverse_map=None, map_args={}, output_shape=None, order=1,
 
     out = None
 
-    if order in range(4) and not map_args:
+    if order == 2:
+        # When fixing this issue, make sure to fix the branches further
+        # below in this function
+        warnings.warn("Bi-quadratic interpolation behavior has changed due "
+                      "to a bug in the implementation of scikit-image. "
+                      "The new version now serves as a wrapper "
+                      "around SciPy's interpolation functions, which itself "
+                      "is not verified to be a correct implementation. Until "
+                      "skimage's implementation is fixed, we recommend "
+                      "to use bi-linear or bi-cubic interpolation instead.")
+
+    if order in (0, 1, 3) and not map_args:
         # use fast Cython version for specific interpolation orders and input
 
         matrix = None

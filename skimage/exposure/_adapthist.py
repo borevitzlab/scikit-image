@@ -22,13 +22,17 @@ from skimage.util import view_as_blocks, pad
 
 MAX_REG_X = 16  # max. # contextual regions in x-direction */
 MAX_REG_Y = 16  # max. # contextual regions in y-direction */
-NR_OF_GREY = 2**14  # number of grayscale levels to use in CLAHE algorithm
+NR_OF_GREY = 2 ** 14  # number of grayscale levels to use in CLAHE algorithm
 
 
 @adapt_rgb(hsv_value)
 def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
                        nbins=256):
-    """Contrast Limited Adaptive Histogram Equalization.
+    """Contrast Limited Adaptive Histogram Equalization (CLAHE).
+
+    An algorithm for local contrast enhancement, that uses histograms computed
+    over different tile regions of the image. Local details can therefore be
+    enhanced even in regions that are darker or lighter than most of the image.
 
     Parameters
     ----------
@@ -48,6 +52,10 @@ def equalize_adapthist(image, ntiles_x=8, ntiles_y=8, clip_limit=0.01,
     -------
     out : ndarray
         Equalized image.
+
+    See Also
+    --------
+    equalize_hist, rescale_intensity
 
     Notes
     -----
@@ -128,7 +136,7 @@ def _clahe(image, ntiles_x, ntiles_y, clip_limit, nbins=128):
         image = pad(image, ((0, h_pad), (0, w_pad)), mode='reflect')
         h_inner, w_inner = image.shape
 
-    bin_size = 1 + NR_OF_GREY / nbins
+    bin_size = 1 + NR_OF_GREY // nbins
     lut = np.arange(NR_OF_GREY)
     lut //= bin_size
     img_blocks = view_as_blocks(image, (height, width))

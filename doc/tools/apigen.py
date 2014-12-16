@@ -200,7 +200,7 @@ class ApiDocWriter(object):
         classes : list of str
             A list of (public) class names in the module.
         """
-        mod = __import__(uri, fromlist=[uri])
+        mod = __import__(uri, fromlist=[uri.split('.')[-1]])
         # find all public objects in the module.
         obj_strs = [obj for obj in dir(mod) if not obj.startswith('_')]
         functions = []
@@ -279,6 +279,20 @@ class ApiDocWriter(object):
 
         ad += '\n.. automodule:: ' + uri + '\n'
         ad += '\n.. currentmodule:: ' + uri + '\n'
+        ad += '.. autosummary::\n\n'
+        for f in functions:
+            ad += '   ' + uri + '.' + f + '\n'
+        ad += '\n'
+        for c in classes:
+            ad += '   ' + uri + '.' + c + '\n'
+        ad += '\n'
+
+        for f in functions:
+            # must NOT exclude from index to keep cross-refs working
+            full_f = uri + '.' + f
+            ad += f + '\n'
+            ad += self.rst_section_levels[2] * len(f) + '\n'
+            ad += '\n.. autofunction:: ' + full_f + '\n\n'
         for c in classes:
             ad += '\n:class:`' + c + '`\n' \
                   + self.rst_section_levels[2] * \
@@ -290,17 +304,6 @@ class ApiDocWriter(object):
                   '  :show-inheritance:\n' \
                   '\n' \
                   '  .. automethod:: __init__\n'
-        ad += '.. autosummary::\n\n'
-        for f in functions:
-            ad += '   ' + uri + '.' + f + '\n'
-        ad += '\n'
-
-        for f in functions:
-            # must NOT exclude from index to keep cross-refs working
-            full_f = uri + '.' + f
-            ad += f + '\n'
-            ad += self.rst_section_levels[2] * len(f) + '\n'
-            ad += '\n.. autofunction:: ' + full_f + '\n\n'
         return ad
 
     def _survives_exclude(self, matchstr, match_type):

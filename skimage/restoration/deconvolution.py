@@ -60,12 +60,12 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     Examples
     --------
     >>> from skimage import color, data, restoration
-    >>> lena = color.rgb2gray(data.lena())
+    >>> img = color.rgb2gray(data.astronaut())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
-    >>> lena = convolve2d(lena, psf, 'same')
-    >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolved_lena = restoration.wiener(lena, psf, 1100)
+    >>> img = convolve2d(img, psf, 'same')
+    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> deconvolved_img = restoration.wiener(img, psf, 1100)
 
     Notes
     -----
@@ -126,8 +126,8 @@ def wiener(image, psf, balance, reg=None, is_real=True, clip=True):
     else:
         trans_func = psf
 
-    wiener_filter = np.conj(trans_func) / (np.abs(trans_func)**2 +
-                                           balance * np.abs(reg)**2)
+    wiener_filter = np.conj(trans_func) / (np.abs(trans_func) ** 2 +
+                                           balance * np.abs(reg) ** 2)
     if is_real:
         deconv = uft.uirfft2(wiener_filter * uft.urfft2(image),
                              shape=image.shape)
@@ -202,12 +202,12 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
     Examples
     --------
     >>> from skimage import color, data, restoration
-    >>> lena = color.rgb2gray(data.lena())
+    >>> img = color.rgb2gray(data.astronaut())
     >>> from scipy.signal import convolve2d
     >>> psf = np.ones((5, 5)) / 25
-    >>> lena = convolve2d(lena, psf, 'same')
-    >>> lena += 0.1 * lena.std() * np.random.standard_normal(lena.shape)
-    >>> deconvolved_lena = restoration.unsupervised_wiener(lena, psf)
+    >>> img = convolve2d(img, psf, 'same')
+    >>> img += 0.1 * img.std() * np.random.standard_normal(img.shape)
+    >>> deconvolved_img = restoration.unsupervised_wiener(img, psf)
 
     Notes
     -----
@@ -261,8 +261,8 @@ def unsupervised_wiener(image, psf, reg=None, user_params=None, is_real=True,
 
     # The correlation of the object in Fourier space (if size is big,
     # this can reduce computation time in the loop)
-    areg2 = np.abs(reg)**2
-    atf2 = np.abs(trans_fct)**2
+    areg2 = np.abs(reg) ** 2
+    atf2 = np.abs(trans_fct) ** 2
 
     # The Fourier transfrom may change the image.size attribut, so we
     # store it.

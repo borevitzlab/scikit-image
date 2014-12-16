@@ -1,22 +1,26 @@
 Image Processing SciKit
 =======================
 
-[![Build Status](https://travis-ci.org/scikit-image/scikit-image.svg)](https://travis-ci.org/scikit-image/scikit-image)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/scikit-image/scikit-image?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Coverage Status](https://img.shields.io/coveralls/scikit-image/scikit-image.svg)](https://coveralls.io/r/scikit-image/scikit-image?branch=master)
 
-Source
-------
-https://github.com/scikit-image/scikit-image
+Website (including documentation)
+---------------------------------
+http://scikit-image.org/
 
 Mailing List
 ------------
 http://groups.google.com/group/scikit-image
 
+Source
+------
+https://github.com/scikit-image/scikit-image
+
 Installation from source
 ------------------------
 Refer to DEPENDS.txt for a list of dependencies.
 
-The SciKit may be installed globally using
+scikit-image may be installed globally using
 
     $ python setup.py install
 

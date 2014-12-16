@@ -39,7 +39,7 @@ except ImportError:
     amg_loaded = False
 from scipy.sparse.linalg import cg
 from ..util import img_as_float
-from ..filter import rank_order
+from ..filters import rank_order
 
 #-----------Laplacian--------------------
 
@@ -454,8 +454,8 @@ def random_walker(data, labels, beta=130, mode='bf', tol=1.e-3, copy=True,
     # Clean up results
     if return_full_prob:
         labels = labels.astype(np.float)
-        X = np.array([_clean_labels_ar(Xline, labels,
-                     copy=True).reshape(dims) for Xline in X])
+        X = np.array([_clean_labels_ar(Xline, labels, copy=True).reshape(dims)
+                      for Xline in X])
         for i in range(1, int(labels.max()) + 1):
             mask_i = np.squeeze(labels == i)
             X[:, mask_i] = 0

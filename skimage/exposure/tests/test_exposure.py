@@ -2,7 +2,8 @@ import warnings
 
 import numpy as np
 from numpy.testing import assert_array_almost_equal as assert_close
-from numpy.testing import assert_array_equal, assert_raises
+from numpy.testing import (assert_array_equal, assert_raises,
+                           assert_almost_equal)
 
 import skimage
 from skimage import data
@@ -12,14 +13,42 @@ from skimage.color import rgb2gray
 from skimage.util.dtype import dtype_range
 
 
+# Test integer histograms
+# =======================
+
+def test_negative_overflow():
+    im = np.array([-1, 127], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im)
+    assert_array_equal(bin_centers, np.arange(-1, 128))
+    assert frequencies[0] == 1
+    assert frequencies[-1] == 1
+    assert_array_equal(frequencies[1:-1], 0)
+
+
+def test_all_negative_image():
+    im = np.array([-128, -1], dtype=np.int8)
+    frequencies, bin_centers = exposure.histogram(im)
+    assert_array_equal(bin_centers, np.arange(-128, 0))
+    assert frequencies[0] == 1
+    assert frequencies[-1] == 1
+    assert_array_equal(frequencies[1:-1], 0)
+
+
 # Test histogram equalization
 # ===========================
 
 np.random.seed(0)
 
+test_img_int = data.camera()
 # squeeze image intensities to lower image contrast
-test_img = skimage.img_as_float(data.camera())
+test_img = skimage.img_as_float(test_img_int)
 test_img = exposure.rescale_intensity(test_img / 5. + 100)
+
+def test_equalize_uint8_approx():
+    """Check integer bins used for uint8 images."""
+    img_eq0 = exposure.equalize_hist(test_img_int)
+    img_eq1 = exposure.equalize_hist(test_img_int, nbins=3)
+    np.testing.assert_allclose(img_eq0, img_eq1)
 
 
 def test_equalize_ubyte():
@@ -177,22 +206,22 @@ def test_adapthist_scalar():
 def test_adapthist_grayscale():
     """Test a grayscale float image
     """
-    img = skimage.img_as_float(data.lena())
+    img = skimage.img_as_float(data.astronaut())
     img = rgb2gray(img)
     img = np.dstack((img, img, img))
     adapted = exposure.equalize_adapthist(img, 10, 9, clip_limit=0.01,
                                           nbins=128)
     assert_almost_equal = np.testing.assert_almost_equal
     assert img.shape == adapted.shape
-    assert_almost_equal(peak_snr(img, adapted), 104.3277, 3)
-    assert_almost_equal(norm_brightness_err(img, adapted), 0.0265, 3)
+    assert_almost_equal(peak_snr(img, adapted), 97.6876, 3)
+    assert_almost_equal(norm_brightness_err(img, adapted), 0.0591, 3)
     return data, adapted
 
 
 def test_adapthist_color():
     """Test an RGB color uint16 image
     """
-    img = skimage.img_as_uint(data.lena())
+    img = skimage.img_as_uint(data.astronaut())
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter('always')
         hist, bin_centers = exposure.histogram(img)
@@ -204,15 +233,15 @@ def test_adapthist_color():
     assert adapted.max() == 1.0
     assert img.shape == adapted.shape
     full_scale = skimage.exposure.rescale_intensity(img)
-    assert_almost_equal(peak_snr(full_scale, adapted), 106.9, 1)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.05, 2)
+    assert_almost_equal(peak_snr(full_scale, adapted), 109.6, 1)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.02, 2)
     return data, adapted
 
 
 def test_adapthist_alpha():
     """Test an RGBA color image
     """
-    img = skimage.img_as_float(data.lena())
+    img = skimage.img_as_float(data.astronaut())
     alpha = np.ones((img.shape[0], img.shape[1]), dtype=float)
     img = np.dstack((img, alpha))
     adapted = exposure.equalize_adapthist(img)
@@ -221,8 +250,8 @@ def test_adapthist_alpha():
     full_scale = skimage.exposure.rescale_intensity(img)
     assert img.shape == adapted.shape
     assert_almost_equal = np.testing.assert_almost_equal
-    assert_almost_equal(peak_snr(full_scale, adapted), 106.86, 2)
-    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0509, 3)
+    assert_almost_equal(peak_snr(full_scale, adapted), 109.60, 2)
+    assert_almost_equal(norm_brightness_err(full_scale, adapted), 0.0235, 3)
 
 
 def peak_snr(img1, img2):
